@@ -4,7 +4,7 @@
 import csv
 import math
 
-def split_file(file_name):
+def split_file(file_name, n):
     with open(file_name, 'r') as file:
         reader = csv.reader(file)
         header = next(reader)
@@ -17,32 +17,25 @@ def split_file(file_name):
         student_codes = list(dict.fromkeys(student_codes))
         # tính số lượng sinh viên trong mỗi file
         num_students = len(student_codes)
-        num_students_per_file = math.ceil(num_students / 3)
-        # chia student_codes thành 3 phần
-        student_codes_1 = student_codes[:num_students_per_file]
-        student_codes_2 = student_codes[num_students_per_file:2*num_students_per_file]
-        student_codes_3 = student_codes[2*num_students_per_file:]
-        # tạo 3 file mới lấy theo student_codes_1, student_codes_2, student_codes_3 đã chia ở trên
-        with open('list_students_1.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(header)
-            for student in students:
-                if student[0] in student_codes_1:
-                    writer.writerow(student)
-        with open('list_students_2.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(header)
-            for student in students:
-                if student[0] in student_codes_2:
-                    writer.writerow(student)
-        with open('list_students_3.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(header)
-            for student in students:
-                if student[0] in student_codes_3:
-                    writer.writerow(student)
+        num_students_per_file = math.ceil(num_students / n)
+        # chia student_codes thành n phần
+        student_codes_parts = [student_codes[i*num_students_per_file:(i+1)*num_students_per_file] for i in range(n)]
+        # tạo n file mới lấy theo student_codes_parts đã chia ở trên
+        for i in range(n):
+            with open(f'list_students_{i+1}.csv', 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(header)
+                for student in students:
+                    if student[0] in student_codes_parts[i]:
+                        writer.writerow(student)
 
 if __name__ == '__main__':
-    split_file('list_students.csv')
+    input_n = input('Enter the number of files: ')
+    try:
+        n = int(input_n)
+        split_file('list_students.csv', n)
+    except ValueError:
+        print('Invalid number of files')
+    split_file('list_students.csv', n)
 
         

@@ -150,6 +150,7 @@ def convert_periods_to_semester(periods):
         if int(period["ordering"]) > 3:
             continue
         full_skill_code = period["skill_code"]
+        real_subject_code = period["subject_code"]
         # chỉ lấy 3 ký tự đầu của mã môn học
         skill_code = period["skill_code"][:3]
         # check xem môn học trong periods có môn học nào trùng 3 ký tự với 3 ký tự của mã môn học trong all_subjects không
@@ -176,11 +177,11 @@ def convert_periods_to_semester(periods):
 
         match int(period["ordering"]):
             case 1:
-                semester1.append((skill_code, full_skill_code))
+                semester1.append((skill_code, full_skill_code, real_subject_code))
             case 2:
-                semester2.append((skill_code, full_skill_code))
+                semester2.append((skill_code, full_skill_code, real_subject_code))
             case 3:
-                semester3.append((skill_code, full_skill_code))
+                semester3.append((skill_code, full_skill_code, real_subject_code))
             case _:
                 continue    
     return semester1, semester2, semester3
@@ -274,6 +275,44 @@ def check_if_subject_is_exempted(skill_code, student_code):
         return True
     return False
 
+def get_able_subject_code(student_code, subject_code):
+    try:
+        try:
+            conn = mariadb.connect(
+                user="hangoclinh",
+                password="1111",
+                host="localhost",
+                port=3306,
+                database="ap_hn20240502",
+            )
+        except mariadb.Error as e:
+            print(f"Error connecting to MariaDB Platform: {e}")
+            sys.exit(1)
+        cur = conn.cursor()
+        query_get_list_subject_able = """
+                                SELECT
+                                    fu_subject.skill_code  
+                                FROM
+                                    change_subject_student 
+                                JOIN fu_subject ON fu_subject.subject_code = change_subject_student.new_subject
+                                JOIN fu_user ON fu_user.user_login = change_subject_student.student_login
+                                WHERE
+                                    fu_user.user_code = '"""+ student_code + """' 
+                                    AND old_subject = '"""+ subject_code +"""'
+                                    """
+        cur.execute(query_get_list_subject_able)
+        res = cur.fetchall()
+        if len(res) == 0:
+            return None
+        return res[0][0]
+    except Exception as e:
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        # print the error line
+        _, _, tb = sys.exc_info()
+        throw_error = f"{current_time}: Error on line {tb.tb_lineno}, {e}"
+        # throw the error
+        raise Exception(throw_error)
+
 def get_info_elective(student_code, subject_code, curriculum_id, semester, list_term_ids):
     try:
         try:
@@ -288,86 +327,96 @@ def get_info_elective(student_code, subject_code, curriculum_id, semester, list_
             print(f"Error connecting to MariaDB Platform: {e}")
             sys.exit(1)
         cur = conn.cursor()
-        query_get_list_elective = "SELECT skill_code FROM fu_elective_group JOIN fu_elective_subject ON fu_elective_subject.elective_group_id = fu_elective_group.id WHERE curriculum_id = " + str(curriculum_id) + " AND ki_thu = " + str(semester)
+        query_get_list_elective = "SELECT fu_elective_group.id, skill_code FROM fu_elective_group JOIN fu_elective_subject ON fu_elective_subject.elective_group_id = fu_elective_group.id WHERE curriculum_id = " + str(curriculum_id) + " AND ki_thu = " + str(semester)
         cur.execute(query_get_list_elective)
         res = cur.fetchall()
-        list_elective = []
-        for item in res:
-            list_elective.append(item[0])
-        if subject_code in list_elective:
-            sql_array_term_ids = ""
-            sql_array_skill_codes = ""
-            grade = None
-            val = None
-            skil_code = None
-            if len(list_term_ids) > 0:
-                sql_array_term_ids = ", ".join([str(i) for i in list_term_ids])
-            if len(list_elective) > 0:
-
-                sql_array_skill_codes = ", ".join([f"'{i}'" for i in list_elective])
-            query_get_info_result_of_elective_subject = """
-                SELECT
-                t7_course_result.grade, t7_course_result.val, t7_course_result.skill_code, fu_subject.num_of_credit
-                FROM
-                t7_course_result
-                JOIN
-                fu_user ON fu_user.user_login = t7_course_result.student_login
-                JOIN fu_subject ON t7_course_result.psubject_code = fu_subject.subject_code
-                WHERE
-                fu_user.user_code = '""" + student_code + """'
-                AND t7_course_result.term_id IN (""" + sql_array_term_ids + """)
-                AND t7_course_result.skill_code IN (""" + sql_array_skill_codes + """)
-                ORDER BY
-                t7_course_result.id DESC
-                LIMIT 1
-            """
-            cur.execute(query_get_info_result_of_elective_subject)
-            res = cur.fetchall()
-            if len(res) > 0:
-                grade = res[0][0]
-                val = res[0][1]
-                skil_code = res[0][2]
-                number_of_credit = res[0][3]
-                query_attendance = (
-                    """
-                    SELECT
-                    (COUNT(fu_attendance.activity_id) * 100.0 / COUNT(fu_activity.id)) AS attendance_rate
-                    FROM
-                    fu_group
-                    JOIN
-                    fu_group_member ON fu_group_member.groupid = fu_group.id
-                    JOIN
-                    fu_user ON fu_user.user_login = fu_group_member.member_login
-                    JOIN
-                    fu_activity ON fu_activity.groupid = fu_group.id
-                    LEFT JOIN
-                    fu_attendance ON fu_activity.id = fu_attendance.activity_id AND fu_attendance.user_login = fu_user.user_login AND fu_attendance.val = 1
-                    WHERE
-                    fu_user.user_code = '"""
-                    + student_code
-                    + """'
-                    AND fu_group.pterm_id IN ("""
-                    + sql_array_term_ids
-                    + """)
-                    AND fu_group.skill_code = '"""
-                    + skil_code
-                    + """'
-                    AND fu_activity.course_slot < 100
-                    GROUP BY fu_user.user_code
-                    """
-                )
-                cur.execute(query_attendance)
-                res = cur.fetchall()
-                attendance_rate = None
-                if len(res) > 0:
-                    attendance_rate = res[0][0]
-                return grade, int(val) > 0, attendance_rate, skil_code, number_of_credit
+        if len(res) == 0:
             return None
+        elective_subject_groups = {}
+        all_groups = []
+        for item in res:
+            # check if elective_subject_groups has the key item[0]
+            if item[0] not in elective_subject_groups:
+                all_groups.append(item[0])
+                elective_subject_groups[item[0]] = []
+            elective_subject_groups[item[0]].append(item[1])
+        for group in all_groups:
+            list_elective = elective_subject_groups[group]
+            if subject_code in list_elective:
+                sql_array_term_ids = ""
+                sql_array_skill_codes = ""
+                grade = None
+                val = None
+                skil_code = None
+                if len(list_term_ids) > 0:
+                    sql_array_term_ids = ", ".join([str(i) for i in list_term_ids])
+                if len(list_elective) > 0:
+
+                    sql_array_skill_codes = ", ".join([f"'{i}'" for i in list_elective])
+                query_get_info_result_of_elective_subject = """
+                    SELECT
+                    t7_course_result.grade, t7_course_result.val, t7_course_result.skill_code, fu_subject.num_of_credit
+                    FROM
+                    t7_course_result
+                    JOIN
+                    fu_user ON fu_user.user_login = t7_course_result.student_login
+                    JOIN fu_subject ON t7_course_result.psubject_code = fu_subject.subject_code
+                    WHERE
+                    fu_user.user_code = '""" + student_code + """'
+                    AND t7_course_result.term_id IN (""" + sql_array_term_ids + """)
+                    AND t7_course_result.skill_code IN (""" + sql_array_skill_codes + """)
+                    ORDER BY
+                    t7_course_result.id DESC
+                    LIMIT 1
+                """
+                cur.execute(query_get_info_result_of_elective_subject)
+                res = cur.fetchall()
+                if len(res) > 0:
+                    grade = res[0][0]
+                    val = res[0][1]
+                    skil_code = res[0][2]
+                    number_of_credit = res[0][3]
+                    query_attendance = (
+                        """
+                        SELECT
+                        (COUNT(fu_attendance.activity_id) * 100.0 / COUNT(fu_activity.id)) AS attendance_rate
+                        FROM
+                        fu_group
+                        JOIN
+                        fu_group_member ON fu_group_member.groupid = fu_group.id
+                        JOIN
+                        fu_user ON fu_user.user_login = fu_group_member.member_login
+                        JOIN
+                        fu_activity ON fu_activity.groupid = fu_group.id
+                        LEFT JOIN
+                        fu_attendance ON fu_activity.id = fu_attendance.activity_id AND fu_attendance.user_login = fu_user.user_login AND fu_attendance.val = 1
+                        WHERE
+                        fu_user.user_code = '"""
+                        + student_code
+                        + """'
+                        AND fu_group.pterm_id IN ("""
+                        + sql_array_term_ids
+                        + """)
+                        AND fu_group.skill_code = '"""
+                        + skil_code
+                        + """'
+                        AND fu_activity.course_slot < 100
+                        GROUP BY fu_user.user_code
+                        """
+                    )
+                    cur.execute(query_attendance)
+                    res = cur.fetchall()
+                    attendance_rate = None
+                    if len(res) > 0:
+                        attendance_rate = res[0][0]
+                    return grade, int(val) > 0, attendance_rate, skil_code, number_of_credit
+                return None
         return None
     except Exception as e:
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         # print the error line
         _, _, tb = sys.exc_info()
-        throw_error = f"Error on line {tb.tb_lineno}, {e}"
+        throw_error = f"{current_time}: Error on line {tb.tb_lineno}, {e}"
         # throw the error
         raise Exception(throw_error)
 
@@ -436,9 +485,10 @@ def get_average_score_of_semester(avg_all_subjects):
             return None
         return total_score / total_credit
     except Exception as e:
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         # print the error line
         _, _, tb = sys.exc_info()
-        throw_error = f"Error on line {tb.tb_lineno}, {e}"
+        throw_error = f"{current_time}: Error on line {tb.tb_lineno}, {e}"
         # throw the error
         raise Exception(throw_error)
         
@@ -478,6 +528,7 @@ student_codes = df["student_code"].unique()
 student_codes = sorted(student_codes, reverse=True)
 # đảm bảo item trong student_codes là không trùng nhau
 student_codes = list(dict.fromkeys(student_codes))
+total_student_codes = len(student_codes)
 # student_codes = list(dict.fromkeys(student_codes))
 # get last 100 student_codes
 # student_codes = student_codes[-5:]
@@ -511,13 +562,14 @@ if os.path.exists(f"results_{file_name_number}.csv"):
                 if not df.empty and len(df) > 0:
                     results = df.to_dict(orient="records")
                     student_codes = [student_code for student_code in student_codes if student_code not in df["student_code"].unique()]
+            else:
+                os.remove(f"results_{file_name_number}.csv")
     except Exception as e:
         # get error line number
         _, _, tb = sys.exc_info()
         print("Error line number: ", tb.tb_lineno, "Error: ", e)
         sys.exit(1)
     
-
 
 # duyệt qua từng sinh viên
 for student_code in student_codes:
@@ -556,7 +608,10 @@ for student_code in student_codes:
 
         # lấy danh sách mã môn học của kỳ học 1
         for info in semester1:
-            prefixed_subject_code, full_subject_code = info
+            prefixed_subject_code, full_subject_code, true_subject_code = info
+            able_subject_code = get_able_subject_code(student_code, true_subject_code)
+            if able_subject_code is not None:
+                full_subject_code = able_subject_code
             student["semester_1"][prefixed_subject_code] = {}
             student["semester_1"][prefixed_subject_code]["attendance_rate"] = (
                 get_attendance_rate(
@@ -591,6 +646,7 @@ for student_code in student_codes:
                         )
                         student["semester_1"][prefixed_subject_code]["number_of_credit"] = elective_info[4]
                         full_subject_code = elective_subject
+                        
             else:
                 student["semester_1"][prefixed_subject_code]["average_score"] = subject_result[0]
                 student["semester_1"][prefixed_subject_code]["passed"] = subject_result[1]
@@ -613,7 +669,10 @@ for student_code in student_codes:
 
         # lấy danh sách mã môn học của kỳ học 2
         for info in semester2:
-            prefixed_subject_code, full_subject_code = info
+            prefixed_subject_code, full_subject_code, true_subject_code = info
+            able_subject_code = get_able_subject_code(student_code, true_subject_code)
+            if able_subject_code is not None:
+                full_subject_code = able_subject_code
             student["semester_2"][prefixed_subject_code] = {}
             student["semester_2"][prefixed_subject_code]["attendance_rate"] = (
                 get_attendance_rate(full_subject_code, student_code, merged_list_term_ids)
@@ -658,7 +717,10 @@ for student_code in student_codes:
         student["semester_2_average_score"] = semester2_average_score
             
         for info in semester3:
-            prefixed_subject_code, full_subject_code = info
+            prefixed_subject_code, full_subject_code, true_subject_code = info
+            able_subject_code = get_able_subject_code(student_code, true_subject_code)
+            if able_subject_code is not None:
+                full_subject_code = able_subject_code
             elective_subject = None
             student["semester_3"][prefixed_subject_code] = {}
             student["semester_3"][prefixed_subject_code]["attendance_rate"] = (
@@ -709,43 +771,50 @@ for student_code in student_codes:
         df = pd.DataFrame(results)
         df.to_csv(f"results_{file_name_number}.csv", index=False)
         end = time.time()
-        process_time.append(end - start)
     except Exception as e:
         errors.append(student_code)
         # print the error line
         _, _, tb = sys.exc_info()
         print("Error processing student: ", student_code, "Error line number: ", tb.tb_lineno, "Error: ", e)
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         # store the errors note in a file
         with open(f"errors_{file_name_number}.txt", "a") as f:
-            f.write(f"{student_code}: on line {tb.tb_lineno}, {e}\n")
+            f.write(f"{current_time}: {student_code}: on line {tb.tb_lineno}, {e}\n")
         end = time.time()
+    process_time.append(end - start)
     # xóa console
     os.system("clear")
     # show tỉ lệ hoàn thành
-    print("Progress: ", (len(results) + len(errors)) / len(student_codes) * 100, "%")
+    progress_rate = (len(results) + len(errors)) / total_student_codes * 100
+    # lam tron 2 chu so thap phan
+    progress_rate = round(progress_rate, 2)
+    print("Progress: ", progress_rate, "%")
     # if end is not defined then print ***
     if np.isnan(end):
         print("Current time per student: *** s")
     else:
-        print("Current time per student: ", end - start, "s")
+        current_time_per_student = round(end - start, 2)
+        print("Current time per student: ", current_time_per_student, "s")
     # trung bình thời gian thực thi
     avg = 0;
     if len(process_time) > 0:
         avg = np.mean(process_time)
+        avg = round(avg, 2)
     else:
         avg = 0
     print("Average time: ", avg)
     # dự đoán thời gian còn lại
-    number_of_students = len(student_codes) - len(results) - len(errors)
+    number_of_students = total_student_codes - len(results) - len(errors)
     if number_of_students <= 0:
         remaining_time = 0
     else:
-        remaining_time = np.mean(process_time) * (len(student_codes) - len(results) - len(errors))
+        remaining_time = np.mean(process_time) * (total_student_codes - len(results) - len(errors))
     # nếu remaining_time là NaN thì gán bằng 0
     if np.isnan(remaining_time):
         remaining_time = 0
     # chuyển sang hh:mm:ss
     remaining_time = time.strftime("%H:%M:%S", time.gmtime(remaining_time))
+    print(f"Total students: {total_student_codes} \nTotal errors: {len(errors)} \nTotal results: {len(results)}")
     print("Remaining time: ", remaining_time)
     
     # đóng kết nối
@@ -753,7 +822,7 @@ for student_code in student_codes:
 
 # show thống kê kết quả
 os.system("clear")
-print("Total students: ", len(student_codes))
+print("Total students: ", total_student_codes)
 print("Total errors: ", len(errors))
 print("Total results: ", len(results))
 print("Total process time: ", np.sum(process_time))
