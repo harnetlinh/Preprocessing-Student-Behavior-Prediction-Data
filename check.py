@@ -8,6 +8,25 @@ import time
 
 terms = [24, 26, 27, 28, 29, 30, 33, 34, 35, 36, 37, 38, 39, 40, 50, 51, 52, 55, 58, 59]
 
+# dictionary chuyển đổi mã môn học sang loại nhóm môn học
+subject_group = {
+    "COM101": "general-common-basic",
+    "COM107": "general-common-basic",
+    "COM108": "major-IT-basic-basicSoftware",
+    "ITI101": "major-IT-basic-basicSoftware",
+    "COM201": "major-IT-basic-databases",
+    "SOA101": "major-IT-advan-databases-security",
+    "COM203": "major-IT-advan-databases",
+    "MOB101": "major-IT-basic-java",
+    "MOB102": "major-IT-advan-java",
+    "NET101": "major-IT-basic-C#",
+    "WEB101": "major-IT-basic-basicWeb",
+    "MUL101": "major-Design-basic-photoshop",
+    
+
+}
+
+
 ho_term_campus_terms = {
     26:24,
     28:26,
