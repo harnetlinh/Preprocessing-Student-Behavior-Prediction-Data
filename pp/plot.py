@@ -9,7 +9,7 @@ combine_data = pd.read_csv('sampled_students_data_new.csv')
 # combine_data = pd.concat([results_1, results_2, results_3], axis=0)
 
 combine_data["status"] = combine_data["semester_3_status"].apply(
-    lambda x: 'THO' if x == 'THO' else 'HDI')
+    lambda x: 'Dropout' if x == 'THO' else 'Non-dropout')
 
 combine_data = combine_data.reset_index()
 
@@ -153,7 +153,7 @@ plt.show()
 # Cumulative Distribution Average Score
 plt.figure(figsize=(10, 6))
 sns.ecdfplot(data=merged_df, x='average_score', hue='status')
-plt.title('Cumulative Distribution Plot of Average Score: THO vs HDI')
+plt.title('Cumulative Distribution Plot of Average Score: Dropout vs Non-dropout')
 plt.xlabel('Average Score')
 plt.ylabel('Cumulative Probability')
 plt.show()
