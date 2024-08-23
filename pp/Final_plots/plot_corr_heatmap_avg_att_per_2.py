@@ -29,6 +29,8 @@ for index, row in combine_data.iterrows():
     df_array.append(sem_df)
 combine_df = pd.concat(df_array)
 
+combine_df = combine_df.dropna()
+
 combine_df["total_credit_2"] = combine_df["number_of_credit"] * combine_df["learnt_times"]
 
 combine_df["credit_passed_2"] = (1 / combine_df["learnt_times"] * combine_df["total_credit_2"]).where(combine_df["passed"] == True, 0)
