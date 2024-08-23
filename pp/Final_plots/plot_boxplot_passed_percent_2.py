@@ -29,6 +29,8 @@ for index, row in combine_data.iterrows():
     df_array.append(sem_df)
 combine_df = pd.concat(df_array)
 
+combine_df = combine_df.dropna()
+
 # Calculate the percentage of passed credit
 combine_df["total_credit"] = combine_df["number_of_credit"] * combine_df["learnt_times"]
 
