@@ -6,12 +6,10 @@ import numpy as np
 import re, ast
 from sklearn.model_selection import train_test_split, KFold, cross_val_score, GridSearchCV, StratifiedKFold
 from imblearn.over_sampling import SMOTE, ADASYN, SMOTENC, RandomOverSampler
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc, classification_report
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from imblearn.pipeline import Pipeline
+from sklearn.naive_bayes import GaussianNB
 
 # Load the dataset
 combine_data = pd.read_csv('sampled_students_data_new.csv')
@@ -108,29 +106,19 @@ smote = SMOTE(random_state=42)
 # Apply SMOTE for oversampling
 X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
 
-lr = LogisticRegression(solver='liblinear')
+nb = GaussianNB()
 
-param_grid = {'lr__C': [0.01, 0.1, 1, 10, 100]}
+nb.fit(X_train_res, y_train_res)
 
-pipeline = Pipeline(steps=[('smote', smote), ('lr', lr)])
-
-kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-
-grid_search = GridSearchCV(pipeline, param_grid, cv=kfold, scoring='f1', n_jobs=-1)
-
-grid_search.fit(X_train_res, y_train_res)
-best_params = grid_search.best_params_
-print(f"Best Hyperparameters: {best_params}")
-
-best_model = grid_search.best_estimator_
-y_val_pred = best_model.predict(X_val)
+y_val_pred = nb.predict(X_val)
 
 print("Validation Set Evaluation")
 print(confusion_matrix(y_val, y_val_pred))
 print(classification_report(y_val, y_val_pred))
 
-y_test_pred = best_model.predict(X_test)
+y_test_pred = nb.predict(X_test)
 
+# Evaluate the model on the test set
 print("Accuracy:", accuracy_score(y_test, y_test_pred))
 print('Precision: ', precision_score(y_test, y_test_pred))
 print('Recall: ', recall_score(y_test, y_test_pred))
@@ -138,7 +126,7 @@ print('F1: ', f1_score(y_test, y_test_pred))
 
 fig, ax = plt.subplots(figsize=(14, 10))
 sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d', annot_kws={'size': 20})
-ax.set_title('Logistic Regression with Hyperparameter Tuning - Accuracy Score: {:.4f}'.format(accuracy_score(y_test, y_test_pred)), fontsize=20)
+ax.set_title('Gaussian Naive Bayes - Accuracy Score: {:.4f}'.format(accuracy_score(y_test, y_test_pred)), fontsize=20)
 ax.set_ylabel('Actual', fontsize=20)
 ax.set_xlabel('Predicted', fontsize=20)
 ax.tick_params(axis='x', labelsize=20)
@@ -147,7 +135,7 @@ ax.collections[0].colorbar.ax.tick_params(labelsize=16)
 plt.show()
 
 # Save the figure
-output_path = 'Model Evaluation - Logistic Regression with Hyperparameter Tuning.png'
+output_path = 'Model Evaluation - Gaussian Naive Bayes - 3 Features.png'
 fig.savefig(output_path, bbox_inches='tight')
 plt.show()
 
