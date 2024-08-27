@@ -152,9 +152,9 @@ print(f"Validation Log Loss: {val_log_loss}")
 y_test_pred = best_model.predict(X_test)
 y_test_pred_prob = best_model.predict_proba(X_test)  # Get probability predictions for log loss
 print("Accuracy:", accuracy_score(y_test, y_test_pred))
-print('Precision: ', precision_score(y_test, y_test_pred))
-print('Recall: ', recall_score(y_test, y_test_pred))
-print('F1: ', f1_score(y_test, y_test_pred))
+print('Precision: ', precision_score(y_test, y_test_pred, average='macro'))
+print('Recall: ', recall_score(y_test, y_test_pred, average='macro'))
+print('F1: ', f1_score(y_test, y_test_pred, average='macro'))
 
 # Log loss calculation on test set
 test_log_loss = log_loss(y_test, y_test_pred_prob)
