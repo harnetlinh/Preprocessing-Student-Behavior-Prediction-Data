@@ -105,7 +105,7 @@ ax.set_ylabel('Passed Credit Percent')
 ax.legend(title='Dropout Status')
 
 # Save the figure
-output_path = 'plot_scatterplot_attendance_rate_and_passed_percent.png'
+output_path = 'plot_scatterplot_attendance_rate_and_passed_percent_final.png'
 fig.savefig(output_path, bbox_inches='tight')
 plt.show()
 
@@ -118,7 +118,7 @@ ax.set_ylabel('Passed Credit Percent')
 ax.legend(title='Dropout Status')
 
 # Save the figure
-output_path = 'plot_scatterplot_average_score_and_passed_percent.png'
+output_path = 'plot_scatterplot_average_score_and_passed_percent_final.png'
 fig.savefig(output_path, bbox_inches='tight')
 plt.show()
 
