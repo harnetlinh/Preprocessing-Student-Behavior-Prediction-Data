@@ -7,6 +7,7 @@ import re, ast
 from sklearn.model_selection import train_test_split, KFold, cross_val_score, GridSearchCV, StratifiedKFold
 from imblearn.over_sampling import SMOTE, ADASYN, SMOTENC, RandomOverSampler
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc, classification_report, log_loss
@@ -93,6 +94,7 @@ df = merged_df[['dropout_status',
                 'average_score',
                 'passed_percent']]
 
+# Data splitting and SMOTE initialization
 X_train_val, X_test, y_train_val, y_test = train_test_split(
     df.drop(['dropout_status'], axis=1),
     df['dropout_status'],
@@ -108,69 +110,69 @@ X_train, X_val, y_train, y_val = train_test_split(
 
 smote = SMOTE(random_state=42)
 
-# Apply SMOTE for oversampling
-X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
-
-# Initialize Logistic Regression
-lr = LogisticRegression(solver='liblinear')
+# Initialize RandomForestClassifier
+rf = RandomForestClassifier(random_state=42)
 
 # Parameter grid to include class_weight
-param_grid = {
-    'lr__C': [0.01, 0.1, 1, 10, 100],
-    'lr__class_weight': [None, 'balanced']  # Adding the class_weight options
+param_grid_rf = {
+    'rf__n_estimators': [50, 100, 200],
+    'rf__max_depth': [None, 10, 20, 30],
+    'rf__min_samples_split': [2, 5, 10],
+    'rf__min_samples_leaf': [1, 2, 4],
+    'rf__class_weight': [None, 'balanced', 'balanced_subsample']  # Adding class_weight options
 }
 
 # Create the pipeline
-pipeline = Pipeline(steps=[('smote', smote), ('lr', lr)])
+pipeline_rf = Pipeline(steps=[('smote', smote), ('rf', rf)])
 
 # Set up StratifiedKFold
 kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-# Set up GridSearchCV with log_loss as an additional scoring metric
-grid_search = GridSearchCV(pipeline, param_grid, cv=kfold, scoring=['f1', 'neg_log_loss'], refit='f1', n_jobs=-1)
+# Set up GridSearchCV
+grid_search_rf = GridSearchCV(pipeline_rf, param_grid_rf, cv=kfold, scoring='f1', n_jobs=-1)
+grid_search_rf.fit(X_train, y_train)
 
-# Fit GridSearchCV
-grid_search.fit(X_train_res, y_train_res)
-best_params = grid_search.best_params_
-print(f"Best Hyperparameters: {best_params}")
+# Best hyperparameters for Random Forest
+best_params_rf = grid_search_rf.best_params_
+print(f"Best Hyperparameters for Random Forest: {best_params_rf}")
 
-# Best model
-best_model = grid_search.best_estimator_
+# Best model for Random Forest
+best_model_rf = grid_search_rf.best_estimator_
 
 # Predictions and evaluation on validation set
-y_val_pred = best_model.predict(X_val)
-y_val_pred_prob = best_model.predict_proba(X_val)  # Get probability predictions for log loss
+y_val_pred_rf = best_model_rf.predict(X_val)
 print("Validation Set Evaluation")
-print(confusion_matrix(y_val, y_val_pred))
-print(classification_report(y_val, y_val_pred))
+print(confusion_matrix(y_val, y_val_pred_rf))
+print(classification_report(y_val, y_val_pred_rf))
 
 # Log loss calculation on validation set
-val_log_loss = log_loss(y_val, y_val_pred_prob)
-print(f"Validation Log Loss: {val_log_loss}")
+y_val_pred_rf_prob = best_model_rf.predict_proba(X_val)  # Get probability predictions for log loss
+val_log_loss_rf = log_loss(y_val, y_val_pred_rf_prob)
+print(f"Validation Log Loss: {val_log_loss_rf}")
 
-# Predictions and evaluation on test set
-y_test_pred = best_model.predict(X_test)
-y_test_pred_prob = best_model.predict_proba(X_test)  # Get probability predictions for log loss
-print("Accuracy:", accuracy_score(y_test, y_test_pred))
-print('Precision: ', precision_score(y_test, y_test_pred))
-print('Recall: ', recall_score(y_test, y_test_pred))
-print('F1: ', f1_score(y_test, y_test_pred))
+# Evaluate on the test set
+y_test_pred_rf = best_model_rf.predict(X_test)
+y_test_pred_rf_prob = best_model_rf.predict_proba(X_test)  # Get probability predictions for log loss
+print("Accuracy:", accuracy_score(y_test, y_test_pred_rf))
+print('Precision: ', precision_score(y_test, y_test_pred_rf))
+print('Recall: ', recall_score(y_test, y_test_pred_rf))
+print('F1: ', f1_score(y_test, y_test_pred_rf))
 
 # Log loss calculation on test set
-test_log_loss = log_loss(y_test, y_test_pred_prob)
-print(f"Test Log Loss: {test_log_loss}")
+test_log_loss_rf = log_loss(y_test, y_test_pred_rf_prob)
+print(f"Test Log Loss: {test_log_loss_rf}")
 
-# Confusion matrix visualization
+# Visualization of confusion matrix and log loss
 fig, ax = plt.subplots(1, 2, figsize=(20, 8))
 
 # Plot confusion matrix for test set
-sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d', annot_kws={'size': 20}, ax=ax[0])
-ax[0].set_title('Confusion Matrix\nLogistic Regression with Hyperparameter Tuning\nAccuracy Score: {:.4f}'.format(accuracy_score(y_test, y_test_pred)), fontsize=15)
+sns.heatmap(confusion_matrix(y_test, y_test_pred_rf), annot=True, fmt='d', annot_kws={'size': 20}, ax=ax[0])
+ax[0].set_title('Confusion Matrix\nRandom Forest Classifier - Accuracy Score: {:.4f}'.format(accuracy_score(y_test, y_test_pred_rf)), fontsize=15)
 ax[0].set_ylabel('Actual', fontsize=15)
 ax[0].set_xlabel('Predicted', fontsize=15)
 
 # Plot Log Loss for validation and test sets
-ax[1].bar(['Validation Log Loss', 'Test Log Loss'], [val_log_loss, test_log_loss], color=['blue', 'orange'])
+ax[1].bar(['Validation Log Loss', 'Test Log Loss'], [val_log_loss_rf, test_log_loss_rf], color=['blue', 'orange'])
 ax[1].set_title('Log Loss Evaluation', fontsize=15)
 ax[1].set_ylabel('Log Loss', fontsize=15)
 
@@ -178,8 +180,9 @@ plt.tight_layout()
 plt.show()
 
 # Save the figure
-output_path = 'Model Evaluation - Logistic Regression with Hyperparameter Tuning - Log Loss.png'
+output_path = 'Model Evaluation - Random Forest with Hyperparameter Tuning - Log Loss.png'
 fig.savefig(output_path, bbox_inches='tight')
 plt.show()
+
 
 
