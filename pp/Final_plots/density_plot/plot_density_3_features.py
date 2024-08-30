@@ -86,21 +86,21 @@ df = merged_df[['Dropout Status',
                 'passed_percent']]
 
 fig, axs = plt.subplots(1, 3, figsize=(30, 10))
-sns.kdeplot(data=df, x="average_score", hue="Dropout Status", multiple="stack", ax=axs[0])
+sns.histplot(data=df, x="average_score", hue="Dropout Status", kde=True, ax=axs[0])
 axs[0].set_title("Density Plot Average Score", fontsize=20)
 axs[0].set_xlabel("Average Score", fontsize=20)
 axs[0].set_ylabel("Density", fontsize=20)
 axs[0].tick_params(axis='x', labelsize=15)
 axs[0].tick_params(axis='y', labelsize=15)
 
-sns.kdeplot(data=df, x="attendance_rate", hue="Dropout Status", multiple="stack", ax=axs[1])
+sns.histplot(data=df, x="attendance_rate", hue="Dropout Status", kde=True, ax=axs[1])
 axs[1].set_title("Density Plot Attendance Rate", fontsize=20)
 axs[1].set_xlabel("Attendance Rate", fontsize=20)
 axs[1].set_ylabel("Density", fontsize=20)
 axs[1].tick_params(axis='x', labelsize=15)
 axs[1].tick_params(axis='y', labelsize=15)
 
-sns.kdeplot(data=df, x="passed_percent", hue="Dropout Status", multiple="stack", ax=axs[2])
+sns.histplot(data=df, x="passed_percent", hue="Dropout Status", kde=True, ax=axs[2])
 axs[2].set_title("Density Plot Passed Credit Percentage", fontsize=20)
 axs[2].set_xlabel("Passed Credit Percentage", fontsize=20)
 axs[2].set_ylabel("Density", fontsize=20)
