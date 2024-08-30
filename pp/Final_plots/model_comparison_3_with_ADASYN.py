@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier, RandomForestRegressor
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, balanced_accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc, classification_report
 from sklearn.utils import resample
@@ -142,21 +142,21 @@ print(classification_report(y_val, y_val_pred))
 y_test_pred = lr.predict(X_test_scaled)
 
 # Evaluate the model on the test set
-print("Accuracy:", accuracy_score(y_test, y_test_pred))
+print("Accuracy:", balanced_accuracy_score(y_test, y_test_pred))
 print('Precision: ', precision_score(y_test, y_test_pred, average='macro'))
 print('Recall: ', recall_score(y_test, y_test_pred, average='macro'))
 print('F1: ', f1_score(y_test, y_test_pred, average='macro'))
 
 metric_list.append({
     "Model": "Logistic Regression",
-    "Accuracy": accuracy_score(y_test, y_test_pred),
+    "Accuracy": balanced_accuracy_score(y_test, y_test_pred),
     "Precision": precision_score(y_test, y_test_pred, average='macro'),
     "Recall": recall_score(y_test, y_test_pred, average='macro'),
     "F1 Score": f1_score(y_test, y_test_pred, average='macro')
 })
 
 sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d')
-plt.title('Accuracy Score: {}'.format(accuracy_score(y_test, y_test_pred)))
+plt.title('Accuracy Score: {}'.format(balanced_accuracy_score(y_test, y_test_pred)))
 plt.ylabel('Actual')
 plt.xlabel('Predicted')
 plt.show()
@@ -177,21 +177,21 @@ print(classification_report(y_val, y_val_pred))
 y_test_pred = nb.predict(X_test_scaled)
 
 # Evaluate the model on the test set
-print("Accuracy:", accuracy_score(y_test, y_test_pred))
+print("Accuracy:", balanced_accuracy_score(y_test, y_test_pred))
 print('Precision: ', precision_score(y_test, y_test_pred, average='macro'))
 print('Recall: ', recall_score(y_test, y_test_pred, average='macro'))
 print('F1: ', f1_score(y_test, y_test_pred, average='macro'))
 
 metric_list.append({
     "Model": "Gaussian Naive Bayes",
-    "Accuracy": accuracy_score(y_test, y_test_pred),
+    "Accuracy": balanced_accuracy_score(y_test, y_test_pred),
     "Precision": precision_score(y_test, y_test_pred, average='macro'),
     "Recall": recall_score(y_test, y_test_pred, average='macro'),
     "F1 Score": f1_score(y_test, y_test_pred, average='macro')
 })
 
 sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d')
-plt.title('Accuracy Score: {}'.format(accuracy_score(y_test, y_test_pred)))
+plt.title('Accuracy Score: {}'.format(balanced_accuracy_score(y_test, y_test_pred)))
 plt.ylabel('Actual')
 plt.xlabel('Predicted')
 plt.show()
@@ -212,21 +212,21 @@ print(classification_report(y_val, y_val_pred))
 y_test_pred = rf.predict(X_test_scaled)
 
 # Evaluate the model on the test set
-print("Accuracy:", accuracy_score(y_test, y_test_pred))
+print("Accuracy:", balanced_accuracy_score(y_test, y_test_pred))
 print('Precision: ', precision_score(y_test, y_test_pred, average='macro'))
 print('Recall: ', recall_score(y_test, y_test_pred, average='macro'))
 print('F1: ', f1_score(y_test, y_test_pred, average='macro'))
 
 metric_list.append({
     "Model": "Random Forest Classifier",
-    "Accuracy": accuracy_score(y_test, y_test_pred),
+    "Accuracy": balanced_accuracy_score(y_test, y_test_pred),
     "Precision": precision_score(y_test, y_test_pred, average='macro'),
     "Recall": recall_score(y_test, y_test_pred, average='macro'),
     "F1 Score": f1_score(y_test, y_test_pred, average='macro')
 })
 
 sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d')
-plt.title('Accuracy Score: {}'.format(accuracy_score(y_test, y_test_pred)))
+plt.title('Accuracy Score: {}'.format(balanced_accuracy_score(y_test, y_test_pred)))
 plt.ylabel('Actual')
 plt.xlabel('Predicted')
 plt.show()
@@ -253,21 +253,21 @@ print(classification_report(y_val, y_val_pred))
 y_test_pred = brf.predict(X_test_scaled)
 
 # Evaluate the model on the test set
-print("Accuracy:", accuracy_score(y_test, y_test_pred))
+print("Accuracy:", balanced_accuracy_score(y_test, y_test_pred))
 print('Precision: ', precision_score(y_test, y_test_pred, average='macro'))
 print('Recall: ', recall_score(y_test, y_test_pred, average='macro'))
 print('F1: ', f1_score(y_test, y_test_pred, average='macro'))
 
 metric_list.append({
     "Model": "Balanced Random Forest Classifier",
-    "Accuracy": accuracy_score(y_test, y_test_pred),
+    "Accuracy": balanced_accuracy_score(y_test, y_test_pred),
     "Precision": precision_score(y_test, y_test_pred, average='macro'),
     "Recall": recall_score(y_test, y_test_pred, average='macro'),
     "F1 Score": f1_score(y_test, y_test_pred, average='macro')
 })
 
 sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d')
-plt.title('Accuracy Score: {}'.format(accuracy_score(y_test, y_test_pred)))
+plt.title('Accuracy Score: {}'.format(balanced_accuracy_score(y_test, y_test_pred)))
 plt.ylabel('Actual')
 plt.xlabel('Predicted')
 plt.show()
@@ -291,21 +291,21 @@ print(classification_report(y_val, y_val_pred))
 y_test_pred = svc.predict(X_test_scaled)
 
 # Evaluate the model on the test set
-print("Accuracy:", accuracy_score(y_test, y_test_pred))
+print("Accuracy:", balanced_accuracy_score(y_test, y_test_pred))
 print('Precision: ', precision_score(y_test, y_test_pred, average='macro'))
 print('Recall: ', recall_score(y_test, y_test_pred, average='macro'))
 print('F1: ', f1_score(y_test, y_test_pred, average='macro'))
 
 metric_list.append({
     "Model": "Support Vector Classifier",
-    "Accuracy": accuracy_score(y_test, y_test_pred),
+    "Accuracy": balanced_accuracy_score(y_test, y_test_pred),
     "Precision": precision_score(y_test, y_test_pred, average='macro'),
     "Recall": recall_score(y_test, y_test_pred, average='macro'),
     "F1 Score": f1_score(y_test, y_test_pred, average='macro')
 })
 
 sns.heatmap(confusion_matrix(y_test, y_test_pred), annot=True, fmt='d')
-plt.title('Accuracy Score: {}'.format(accuracy_score(y_test, y_test_pred)))
+plt.title('Accuracy Score: {}'.format(balanced_accuracy_score(y_test, y_test_pred)))
 plt.ylabel('Actual')
 plt.xlabel('Predicted')
 plt.show()
