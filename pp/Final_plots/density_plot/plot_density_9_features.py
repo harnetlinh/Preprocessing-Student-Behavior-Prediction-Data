@@ -75,6 +75,12 @@ df = merged_df[['Dropout Status',
                 'semester_1_attendance_rate', "semester_1_average_score", "semester_1_passed_percent",
                 'semester_2_attendance_rate', "semester_2_average_score", "semester_2_passed_percent",
                 'semester_3_attendance_rate', "semester_3_average_score", "semester_3_passed_percent"]]
+plt.rcParams.update({'font.size': 28})
+plt.rcParams.update({'axes.labelsize': 28})
+plt.rcParams.update({'axes.titlesize': 28})
+plt.rcParams.update({'xtick.labelsize': 28})
+plt.rcParams.update({'ytick.labelsize': 28})
+plt.rcParams.update({'legend.fontsize': 24})
 
 
 fig, axs = plt.subplots(3, 3, figsize=(45, 45))
