@@ -134,9 +134,6 @@ mode_line = [mlines.Line2D([], [], color='red', linestyle='-', label='Non-Dropou
 
 fig, axs = plt.subplots(3, 3, figsize=(45, 45))
 sns.histplot(data=df, x="semester_1_average_score", hue="Dropout Status", kde=True, ax=axs[0,0], stat='percent', common_norm=False)
-mean_avg1 = df['semester_1_average_score'].mean()
-median_avg1 = df['semester_1_average_score'].median()
-mode_avg1 = df['semester_1_average_score'].mode()[0]
 axs[0,0].set_title("Distribution of Average Score Semester 1", fontsize=28)
 axs[0,0].set_xlabel("Average Score", fontsize=28)
 axs[0,0].set_ylabel("", fontsize=28)
@@ -151,17 +148,14 @@ hue_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', labe
                for color, label in zip(hue_colors, hue_labels)]
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):               
-    axs[0,0].axvline(mean_avg1, color='red', linestyle='--')
-    axs[0,0].axvline(median_avg1, color='green', linestyle='--')
-    axs[0,0].axvline(mode_avg1, color='blue', linestyle='--')
+    axs[0,0].axvline(mean_avg1[status], color=color, linestyle='--')
+    axs[0,0].axvline(median_avg1[status], color=color, linestyle=':')
+    axs[0,0].axvline(mode_avg1[status], color=color, linestyle='-')
 axs[0,0].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[0,0].add_artist(axs[0,0].get_legend())
 axs[0,0].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_2_average_score", hue="Dropout Status", kde=True, ax=axs[0,1], stat='percent', common_norm=False)
-mean_avg2 = df['semester_2_average_score'].mean()
-median_avg2 = df['semester_2_average_score'].median()
-mode_avg2 = df['semester_2_average_score'].mode()[0]
 axs[0,1].set_title("Distribution of Average Score Semester 2", fontsize=28)
 axs[0,1].set_xlabel("Average Score", fontsize=28)
 axs[0,1].set_ylabel("", fontsize=28)
@@ -170,17 +164,14 @@ axs[0,1].tick_params(axis='y', labelsize=28)
 axs[0,1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[0,1].axvline(mean_avg2, color='red', linestyle='--')
-    axs[0,1].axvline(median_avg2, color='green', linestyle='--')
-    axs[0,1].axvline(mode_avg2, color='blue', linestyle='--')
+    axs[0,1].axvline(mean_avg2[status], color=color, linestyle='--')
+    axs[0,1].axvline(median_avg2[status], color=color, linestyle=':')
+    axs[0,1].axvline(mode_avg2[status], color=color, linestyle='-')
 axs[0,1].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[0,1].add_artist(axs[0,1].get_legend())
 axs[0,1].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_3_average_score", hue="Dropout Status", kde=True, ax=axs[0,2], stat='percent', common_norm=False)
-mean_avg3 = df['semester_3_average_score'].mean()
-median_avg3 = df['semester_3_average_score'].median()
-mode_avg3 = df['semester_3_average_score'].mode()[0]
 axs[0,2].set_title("Distribution of Average Score Semester 3", fontsize=28)
 axs[0,2].set_xlabel("Average Score", fontsize=28)
 axs[0,2].set_ylabel("", fontsize=28)
@@ -189,17 +180,14 @@ axs[0,2].tick_params(axis='y', labelsize=28)
 axs[0,2].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[0,2].axvline(mean_avg3, color='red', linestyle='--')
-    axs[0,2].axvline(median_avg3, color='green', linestyle='--')
-    axs[0,2].axvline(mode_avg3, color='blue', linestyle='--')
+    axs[0,2].axvline(mean_avg3[status], color=color, linestyle='--')
+    axs[0,2].axvline(median_avg3[status], color=color, linestyle=':')
+    axs[0,2].axvline(mode_avg3[status], color=color, linestyle='-')
 axs[0,2].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[0,2].add_artist(axs[0,2].get_legend())
 axs[0,2].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_1_attendance_rate", hue="Dropout Status", kde=True, ax=axs[1,0], stat='percent', common_norm=False)
-mean_att1 = df['semester_1_attendance_rate'].mean()
-median_att1 = df['semester_1_attendance_rate'].median()
-mode_att1 = df['semester_1_attendance_rate'].mode()[0]
 axs[1,0].set_title("Distribution of Attendance Rate Semester 1", fontsize=28)
 axs[1,0].set_xlabel("Attendance Rate", fontsize=28)
 axs[1,0].set_ylabel("", fontsize=28)
@@ -208,17 +196,14 @@ axs[1,0].tick_params(axis='y', labelsize=28)
 axs[1,0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[1,0].axvline(mean_att1, color='red', linestyle='--')
-    axs[1,0].axvline(median_att1, color='green', linestyle='--')
-    axs[1,0].axvline(mode_att1, color='blue', linestyle='--')
+    axs[1,0].axvline(mean_att1[status], color=color, linestyle='--')
+    axs[1,0].axvline(median_att1[status], color=color, linestyle=':')
+    axs[1,0].axvline(mode_att1[status], color=color, linestyle='-')
 axs[1,0].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[1,0].add_artist(axs[1,0].get_legend())
 axs[1,0].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_2_attendance_rate", hue="Dropout Status", kde=True, ax=axs[1,1], stat='percent', common_norm=False)
-mean_att2 = df['semester_2_attendance_rate'].mean()
-median_att2 = df['semester_2_attendance_rate'].median()
-mode_att2 = df['semester_2_attendance_rate'].mode()[0]
 axs[1,1].set_title("Distribution of Attendance Rate Semester 2", fontsize=28)
 axs[1,1].set_xlabel("Attendance Rate", fontsize=28)
 axs[1,1].set_ylabel("", fontsize=28)
@@ -227,17 +212,14 @@ axs[1,1].tick_params(axis='y', labelsize=28)
 axs[1,1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[1,1].axvline(mean_att2, color='red', linestyle='--')
-    axs[1,1].axvline(median_att2, color='green', linestyle='--')
-    axs[1,1].axvline(mode_att2, color='blue', linestyle='--')
+    axs[1,1].axvline(mean_att2[status], color=color, linestyle='--')
+    axs[1,1].axvline(median_att2[status], color=color, linestyle=':')
+    axs[1,1].axvline(mode_att2[status], color=color, linestyle='-')
 axs[1,1].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[1,1].add_artist(axs[1,1].get_legend())
 axs[1,1].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_3_attendance_rate", hue="Dropout Status", kde=True, ax=axs[1,2], stat='percent', common_norm=False)
-mean_att3 = df['semester_3_attendance_rate'].mean()
-median_att3 = df['semester_3_attendance_rate'].median()
-mode_att3 = df['semester_3_attendance_rate'].mode()[0]
 axs[1,2].set_title("Distribution of Attendance Rate Semester 3", fontsize=28)
 axs[1,2].set_xlabel("Attendance Rate", fontsize=28)
 axs[1,2].set_ylabel("", fontsize=28)
@@ -246,17 +228,14 @@ axs[1,2].tick_params(axis='y', labelsize=28)
 axs[1,2].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[1,2].axvline(mean_att3, color='red', linestyle='--')
-    axs[1,2].axvline(median_att3, color='green', linestyle='--')
-    axs[1,2].axvline(mode_att3, color='blue', linestyle='--')
+    axs[1,2].axvline(mean_att3[status], color=color, linestyle='--')
+    axs[1,2].axvline(median_att3[status], color=color, linestyle=':')
+    axs[1,2].axvline(mode_att3[status], color=color, linestyle='-')
 axs[1,2].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[1,2].add_artist(axs[1,2].get_legend())
 axs[1,2].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_1_passed_percent", hue="Dropout Status", kde=True, ax=axs[2,0], stat='percent', common_norm=False)
-mean_pass1 = df['semester_1_passed_percent'].mean()
-median_pass1 = df['semester_1_passed_percent'].median()
-mode_pass1 = df['semester_1_passed_percent'].mode()[0]
 axs[2,0].set_title("Distribution of Passed Credit Rate Semester 1", fontsize=28)
 axs[2,0].set_xlabel("Passed Credit Rate", fontsize=28)
 axs[2,0].set_ylabel("", fontsize=28)
@@ -265,17 +244,14 @@ axs[2,0].tick_params(axis='y', labelsize=28)
 axs[2,0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[2,0].axvline(mean_pass1, color='red', linestyle='--')
-    axs[2,0].axvline(median_pass1, color='green', linestyle='--')
-    axs[2,0].axvline(mode_pass1, color='blue', linestyle='--')
+    axs[2,0].axvline(mean_pass1[status], color=color, linestyle='--')
+    axs[2,0].axvline(median_pass1[status], color=color, linestyle=':')
+    axs[2,0].axvline(mode_pass1[status], color=color, linestyle='-')
 axs[2,0].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[2,0].add_artist(axs[2,0].get_legend())
 axs[2,0].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_2_passed_percent", hue="Dropout Status", kde=True, ax=axs[2,1], stat='percent', common_norm=False)
-mean_pass2 = df['semester_2_passed_percent'].mean()
-median_pass2 = df['semester_2_passed_percent'].median()
-mode_pass2 = df['semester_2_passed_percent'].mode()[0]
 axs[2,1].set_title("Distribution of Passed Credit Rate Semester 2", fontsize=28)
 axs[2,1].set_xlabel("Passed Credit Rate", fontsize=28)
 axs[2,1].set_ylabel("", fontsize=28)
@@ -284,17 +260,14 @@ axs[2,1].tick_params(axis='y', labelsize=28)
 axs[2,1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[2,1].axvline(mean_pass2, color='red', linestyle='--')
-    axs[2,1].axvline(median_pass2, color='green', linestyle='--')
-    axs[2,1].axvline(mode_pass2, color='blue', linestyle='--')
+    axs[2,1].axvline(mean_pass2[status], color=color, linestyle='--')
+    axs[2,1].axvline(median_pass2[status], color=color, linestyle=':')
+    axs[2,1].axvline(mode_pass2[status], color=color, linestyle='-')
 axs[2,1].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[2,1].add_artist(axs[2,1].get_legend())
 axs[2,1].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
 
 sns.histplot(data=df, x="semester_3_passed_percent", hue="Dropout Status", kde=True, ax=axs[2,2], stat='percent', common_norm=False)
-mean_pass3 = df['semester_3_passed_percent'].mean()
-median_pass3 = df['semester_3_passed_percent'].median()
-mode_pass3 = df['semester_3_passed_percent'].mode()[0]
 axs[2,2].set_title("Distribution of Passed Credit Rate Semester 3", fontsize=28)
 axs[2,2].set_xlabel("Passed Credit Rate", fontsize=28)
 axs[2,2].set_ylabel("", fontsize=28)
@@ -303,9 +276,9 @@ axs[2,2].tick_params(axis='y', labelsize=28)
 axs[2,2].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 100:.2f}'))
 
 for status, color in zip(df['Dropout Status'].unique(), ['red', 'green']):
-    axs[2,2].axvline(mean_pass3, color='red', linestyle='--')
-    axs[2,2].axvline(median_pass3, color='green', linestyle='--')
-    axs[2,2].axvline(mode_pass3, color='blue', linestyle='--')
+    axs[2,2].axvline(mean_pass3[status], color=color, linestyle='--')
+    axs[2,2].axvline(median_pass3[status], color=color, linestyle=':')
+    axs[2,2].axvline(mode_pass3[status], color=color, linestyle='-')
 axs[2,2].legend(handles=hue_handles, title='Dropout Status', loc='upper right')
 axs[2,2].add_artist(axs[2,2].get_legend())
 axs[2,2].legend(handles=mean_line + median_line + mode_line, title='Statistics', loc='upper left')
